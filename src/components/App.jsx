@@ -30,11 +30,12 @@ export class App extends Component {
               items: [...prevState.items, ...hits],
               total: total,
             }));
-          }
+          } else {return Promise.reject(`There is no any result on ${searchQuerry} Please, enter valid search querry`)}
           if (hits.length >= 12) {
             this.setState({ isLoadMoreShown: true });
           }
         })
+        .catch(error => window.alert(error))
         .finally(this.setState({ isLoading: false }));
     }
   }
