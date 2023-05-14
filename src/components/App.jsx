@@ -13,34 +13,42 @@ export class App extends Component {
     isLoading: false,
     isLoadMoreShown: false,
   };
-  componentDidUpdate(prevProps, prevState) {
+  async componentDidUpdate(prevProps, prevState) {
     const { searchQuerry, pageNumber } = this.state;
 
     if (
       prevState.searchQuerry !== searchQuerry ||
       prevState.pageNumber !== pageNumber
     ) {
-      this.setState({ isLoading: true, isLoadMoreShown: false });
+      try {
+        this.setState({ isLoading: true, isLoadMoreShown: false });
 
-      getImagesFromPixabayAPI(searchQuerry, pageNumber)
-        .then(data => {
-          const { hits, total } = data.data;
-          if (hits.length !== 0) {
-            this.setState(prevState => ({
-              items: [...prevState.items, ...hits],
-              total: total,
-            }));
-          } else {
-            return Promise.reject(
-              `There is no any result on ${searchQuerry} Please, enter valid search querry`
-            );
-          }
-          if (hits.length >= 12) {
-            this.setState({ isLoadMoreShown: true });
-          }
-        })
-        .catch(error => window.alert(error))
-        .finally(this.setState({ isLoading: false }));
+        const response = await getImagesFromPixabayAPI(
+          searchQuerry,
+          pageNumber
+        );
+        const { hits, total } = response.data;
+        if (hits.length !== 0) {
+          this.setState(prevState => ({
+            items: [...prevState.items, ...hits],
+            total: total,
+          }));
+        } else {
+          window.alert(
+            `There is no any result on ${searchQuerry} Please, enter valid search querry`
+          );
+          return;
+        }
+        if (hits.length >= 12) {
+          this.setState({ isLoadMoreShown: true });
+        }
+      } catch {
+        window.alert(
+          `There is no connetion to server. Check your internet connection or try later`
+        );
+      } finally {
+        this.setState({ isLoading: false });
+      }
     }
   }
 
@@ -68,12 +76,14 @@ export class App extends Component {
     return (
       <div className={css.app}>
         <Searchbar onSubmit={this.updateSearchQuerry} />
-        <ImageGallery
-          items={items}
-          onClickLoadMore={this.handlerLoadMoreButton}
-          isLoading={isLoading}
-          isLoadMoreShown={isLoadMoreShown}
-        />
+        {items.length > 0 && (
+          <ImageGallery
+            items={items}
+            onClickLoadMore={this.handlerLoadMoreButton}
+            isLoading={isLoading}
+            isLoadMoreShown={isLoadMoreShown}
+          />
+        )}
       </div>
     );
   }
