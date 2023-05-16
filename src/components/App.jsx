@@ -3,6 +3,8 @@ import css from './App.module.css';
 import { getImagesFromPixabayAPI } from 'functions/pixabayAPI';
 import { Searchbar } from './Searchbar/Searchbar';
 import ImageGallery from './ImageGallery/ImageGallery';
+import Button from 'components/Button/Button';
+import Loader from 'components/Loader/Loader';
 
 export class App extends Component {
   state = {
@@ -22,6 +24,7 @@ export class App extends Component {
     ) {
       try {
         this.setState({ isLoading: true, isLoadMoreShown: false });
+        console.log('is loading');
 
         const response = await getImagesFromPixabayAPI(
           searchQuerry,
@@ -76,13 +79,10 @@ export class App extends Component {
     return (
       <div className={css.app}>
         <Searchbar onSubmit={this.updateSearchQuerry} />
-        {items.length > 0 && (
-          <ImageGallery
-            items={items}
-            onClickLoadMore={this.handlerLoadMoreButton}
-            isLoading={isLoading}
-            isLoadMoreShown={isLoadMoreShown}
-          />
+        {items.length > 0 && <ImageGallery items={items} />}
+        {isLoading && <Loader />}
+        {isLoadMoreShown && (
+          <Button text="Load more" onClick={this.handlerLoadMoreButton} />
         )}
       </div>
     );
