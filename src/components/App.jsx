@@ -24,7 +24,6 @@ export class App extends Component {
     ) {
       try {
         this.setState({ isLoading: true, isLoadMoreShown: false });
-        console.log('is loading');
 
         const response = await getImagesFromPixabayAPI(
           searchQuerry,
